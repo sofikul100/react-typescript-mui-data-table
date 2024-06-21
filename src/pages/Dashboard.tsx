@@ -21,6 +21,15 @@ type Person = {
 
 const columnHelper = createMRTColumnHelper<Person>();
 const columns = [
+  {
+    header: 'Status',
+    accessorFn: (originalRow) => (originalRow.isActive ? 'true' : 'false'), //must be strings
+    id: 'isActive',
+    filterVariant: 'checkbox',
+    Cell: ({ cell }) =>
+      cell.getValue() === 'true' ? 'Active' : 'Inactive',
+    size: 170,
+  },
   columnHelper.accessor("id", {
     header: "ID",
     size: 40,
@@ -28,6 +37,7 @@ const columns = [
   columnHelper.accessor("firstName", {
     header: "First Name",
     size: 120,
+    filterVariant: 'text', // default
   }),
   columnHelper.accessor("lastName", {
     header: "Last Name",
@@ -141,12 +151,15 @@ const Dashboard = () => {
   const table = useMaterialReactTable({
     columns,
     data, //data must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
+   
     enablePagination: true,
-    initialState: { pagination: { pageIndex: 0, pageSize: 5 } },
+    initialState: { pagination: { pageIndex: 0, pageSize: 5 },showColumnFilters:true },
     enableRowSelection: true,
     columnFilterDisplayMode: "popover",
+    enableGlobalFilter:true,
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",
+   
     renderTopToolbarCustomActions: ({ table }) => (
       <Box
         sx={{
@@ -206,7 +219,7 @@ const Dashboard = () => {
   });
   return (
     <>
-      <div>
+      <div className="overflow-x-scroll w-100 h-auto">
         <MaterialReactTable table={table} />
       </div>
     </>
