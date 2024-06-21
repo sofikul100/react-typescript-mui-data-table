@@ -161,6 +161,15 @@ export default function MiniDrawer() {
               <ListItemText primary="Manage Task" />
             </ListItemButton>
           </Link>
+
+          <Link to={"/form"}>
+            <ListItemButton>
+              <ListItemIcon>
+                <TaskIcon />
+              </ListItemIcon>
+              <ListItemText primary="Manage Form" />
+            </ListItemButton>
+          </Link>
         </List>
       </Drawer>
     </>

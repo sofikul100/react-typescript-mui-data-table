@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Loader from "./pages/Loader";
 import { Provider } from "react-redux";
 import store from "./store";
+import Practices from "./pages/form/Practices";
 
 //=======imports routing file =========//
 const Task = React.lazy(() => import("./pages/Task"));
@@ -34,6 +35,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/task" element={<Task />} />
+                <Route path="/form" element={<Practices />} />
                 <Route path="*" element={<h1>404 Not Found</h1>} />
               </Routes>
             </Suspense>
