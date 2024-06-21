@@ -1,80 +1,55 @@
-import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+// src/services/tasks.ts
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-import { Task } from "../vite-env";
-
-interface TaskData {
-  task: Task[];
-  error: string | null | undefined;
-  loading: boolean;
+export interface Task {
+  id: number;
+  title: string;
+  completed: boolean;
 }
 
-const initialState: TaskData = {
-  task: [],
-  error: null,
-  loading: false,
-};
-
-export const fetchTask = createAsyncThunk<Task[] | undefined, void>(
-  "fetchTask",
-  async () => {
-    try {
-      const response = await axios.get<Task[]>(
-        `https://64ad7b00b470006a5ec606ef.mockapi.io/task`
-      );
-      return response.data;
-    } catch (err) {
-      console.log(err);
-    }
-  }
-);
-
-export const addTask = createAsyncThunk("addTask", async (newTask) => {
-  try {
-
-    const response = await axios.post<Task>(
-      `https://64ad7b00b470006a5ec606ef.mockapi.io/task`,newTask
-      
-    );
-    console.log(response);
-  } catch (err) {
-    console.log(err);
-  }
+export const tasksApi = createApi({
+  reducerPath: 'tasksApi',
+  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
+  tagTypes: ['Task'],
+  endpoints: (builder) => ({
+    getTasks: builder.query<Task[], void>({
+      query: () => '/tasks',
+      providesTags: ['Task'],
+    }),
+    getTask: builder.query<Task, number>({
+      query: (id) => `/tasks/${id}`,
+      providesTags: ['Task'],
+    }),
+    addTask: builder.mutation<Task, Partial<Task>>({
+      query: (task) => ({
+        url: '/tasks',
+        method: 'POST',
+        body: task,
+      }),
+      invalidatesTags: ['Task'],
+    }),
+    updateTask: builder.mutation<Task, Task>({
+      query: ({ id, ...rest }) => ({
+        url: `/tasks/${id}`,
+        method: 'PUT',
+        body: rest,
+      }),
+      invalidatesTags: ['Task'],
+    }),
+    deleteTask: builder.mutation<{ success: boolean; id: number }, number>({
+      query: (id) => ({
+        url: `/tasks/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Task'],
+    }),
+  }),
 });
 
-const TaskSlice = createSlice({
-  name: "tasks",
-  initialState,
-  reducers: {
-    addTasknew: (state, action: PayloadAction<Task>) => {
-      state.task.push(action.payload);
-    },
-  },
-  extraReducers: (builder) => {
-    //=====fetching all task list==========//
-    builder.addCase(fetchTask.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(
-      fetchTask.fulfilled,
-      (state, action: PayloadAction<Task[] | undefined>) => {
-        if (action.payload) {
-          state.loading = false;
-          state.task = action.payload;
-        }
-      }
-    );
-    builder.addCase(
-      fetchTask.rejected,
-      (state, action: PayloadAction<string>) => {
-        state.loading = false;
-        state.error = action.payload;
-      }
-    );
-    //==========adding new task==========//
-  },
-});
-
-export const {addTasknew} = TaskSlice.actions
-
-export default TaskSlice.reducer;
+export const {
+  useGetTasksQuery,
+  useGetTaskQuery,
+  useAddTaskMutation,
+  useUpdateTaskMutation,
+  useDeleteTaskMutation,
+} = tasksApi;
